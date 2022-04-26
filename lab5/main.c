@@ -57,6 +57,7 @@ int main(void) {
 	}
 	print_array(ip, n);
 	printf("No.2 -------------------\n");
+	int n = 20;
 	array_list_t p;
 	p.get_int_array_list = get_int_array;
 	p.set_value_list = set_value;

@@ -1,127 +1,145 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 
-typedef struct emp_record{
-    int emp_id;
-    char emp_name[10];
-    int emp_salary;
-}emp_record_t;
+typedef struct lotto_record {
+	int lotto_no;
+	int lotto_receipt;
+	int emp_id;
+	char lotto_date[32];
+	char lotto_time[32];
+} lotto_record_t;
 
+typedef struct emp_record {
+	int emp_id;
+	char emp_name[20];
+	int emp_salary;
+} emp_record_t;
 
+int main(void) {
+	FILE* fp;
+	FILE* fp_count;
+	FILE* fp_operator;
+	FILE* fp_record;
+	int n, i, j, k, temp;
+	int num[5][7];
+	int count[] = {1};
+	int operator_id[1];
 
-int main(){
-    int a[7]={0},tmp=0,counter,n,o,id,salary;
- 
-    char lotto[50]="lotto[0000";
-    char last[50]="0].txt";
-    char opname[10];
-    printf("歡迎光臨長庚樂透彩購買機台\n");
-    printf("輸入操作人員ID(0~5):");
-    scanf("%d",&o);
-    if (o!=0) { 
-        FILE* fp1;
-      fp1=fopen("counter.bin","r");
+	printf("歡迎光臨長庚樂透彩購買機台\n");
 
-        int arr_write[1]={0};
-    
-     if(fp1==NULL){
-        FILE* fptmp= fopen("counter.bin","wb+");
-         fwrite(arr_write,sizeof(int),1,fptmp);
-        fclose(fptmp);
-        }else{
-        fclose(fp1);
-     }
-        int arr_read[1];
-       FILE *fptmp1=fopen("counter.bin","rb");
-       fread(arr_read,sizeof(int),1,fptmp1);
-       counter=arr_read[0];
-       fclose(fptmp1);
-       last[0]=counter+49;
-       strcat(lotto,last);   
-        ++counter;
-        FILE *fp;
-        fp=fopen(lotto,"w+");
-        printf("請問你要買幾組樂透彩(1~5): ");
-        scanf("%d",&n);
-        printf("已為您購買的%d組樂透組合輸出至 lotto.txt\n",n);
-        fprintf(fp,"======== lotto649 =========\n");
-        fprintf(fp,"=======+ No.%05d +========\n",counter);
-        time_t curtime;
-         time(&curtime);
-        fprintf(fp,"= %.24s=\n",ctime(&curtime));
+	printf("請輸入操作人員ID (0-5): ");
+	scanf("%d", &operator_id[0]);
+	fp_operator = fopen("operator_id_old.bin", "wb+");
+	fwrite(operator_id, sizeof(int), 1, fp_operator);
+	fclose(fp_operator);
 
-        for (int i=0;i<5;i++) {
-            fprintf(fp,"[%d]: ",i+1);
-            if (i<=(n-1)) {
-             for (int i=0;i<6;i++) {
-                a[i]=rand()%69+1;
-             }
-             a[6]=rand()%9+1;
-                for (int i=0;i<6;i++) {
-                 for (int j=i+1;j<6;j++) {
-                    if (a[i]==a[j]) {
-                    a[j]=rand()%69+1;
-                  }
-                 }
-              }
-         for (int j=5;j>0;j--) {
-         for (int k=0;k<=j-1;k++) {
-             if (a[k]>a[k+1]) {
-                tmp=a[k];
-                a[k]=a[k+1];
-                a[k+1]=tmp;
-             }
-            }
-         }
-         for (int i=0;i<7;i++) {
-             if (a[i]<10) {
-                 fprintf(fp,"0%d ",a[i]);
-             } else {fprintf(fp,"%d ",a[i]);
-             }
-             }
-         fprintf(fp,"\n");
-         } else {
-         for (int i=0;i<7;i++) {
-               fprintf(fp,"-- ");
-          }
-                  fprintf(fp,"\n");
-            }        tmp=0;
-                  for (int i=0;i<7;i++) {
-                      a[i]=0;
-                 }
-              
-            } 
-         fprintf(fp,"========* Op.0000%d *=======\n",o);
-         fprintf(fp,"======== csie@CGU =========\n");
-         fclose(fp);
-     FILE* fp3=fopen("operator_id.bin","wb");  
-     fwrite(&o,sizeof(int),1,fp3);
-     fclose(fp3);  
-    
-     arr_write[0]=counter;
-     FILE* fp2=fopen("counter.bin","wb");
-     fwrite(arr_write,sizeof(int),1,fp2);
-     fclose(fp2);
-    }else{
-    
-    printf("請輸入要新增操作人員 ID(1-99 :");
-    scanf("%d",&id);
-    printf("請輸入要新增操作人員 Name:");
-    scanf("%s",opname);
-    printf("請輸入要新增操作人員 Salary:");
-    scanf("%d",&salary);
-    printf("輸入完成");
-    emp_record_t g;
-    g.emp_id=id;
-    strcpy(g.emp_name,opname);
-    g.emp_salary=salary;
-    FILE *fp5=fopen("operator_id.bin","ab");
-    fwrite(&g.emp_id,sizeof(int),1,fp5);
-    fwrite(g.emp_name,1,sizeof(g.emp_name),fp5);
-    fwrite(&g.emp_salary,sizeof(int),1,fp5);
-    fclose(fp5);
+	if(operator_id[0] != 0) {
 
-   }
+		if((fp_count = fopen("lotto_count.bin", "rb")) != NULL) {
+			fread(count, sizeof(int), 1, fp_count);
+			fclose(fp_count);
+		} else {
+			fp_count = fopen("lotto_count.bin", "wb+");
+			fwrite(count, sizeof(int), 1, fp_count);
+			fclose(fp_count);
+		}
+		printf("請問您要買幾組樂透彩 : ");
+		scanf("%d", &n);
+        char buffer_title[32];
+        
+		snprintf(buffer_title, sizeof(char) * 32, "lotto[0000%i].txt", count[0]);
+		fp = fopen(buffer_title, "wb");
+		fprintf(fp, "========= lotto649 =========\n");
+		fprintf(fp, "========+ No.%05d +========\n", count[0]);
+
+		time_t curtime;
+		struct tm *info;
+		char buffer[80];
+		time(&curtime);
+		info = localtime(&curtime);
+		strftime(buffer, 80, "%a %b %d %X %Y", info);
+		fprintf(fp, "= %s =\n", buffer);
+
+		for(i = 0; i < 5; i++) {
+			for(j = 0; j < 6; j++) {
+				num[i][j] = rand() % 69 + 1;
+			}
+		//bubble sort
+			for(j = 0; j < 6; j++) {
+				for(k = 0; k < 5 - j; k++) {
+					if(num[i][k] > num[i][k + 1]) {
+						temp = num[i][k];
+						num[i][k] = num[i][k + 1];
+						num[i][k + 1] = temp;
+					}
+				}
+			}
+		}
+		for(i = 0; i < 5; i++) {
+			fprintf(fp, "[%d]: ", i + 1);
+			num[i][6] = rand() % 10 + 1;
+			for(j = 0; j < 6; j++) {
+				if(i >= n) {
+					fprintf(fp, "-- ");
+				} else if(num[i][j] < 10) {
+					fprintf(fp, "0%d ", num[i][j]);
+				} else {
+					fprintf(fp, "%d ", num[i][j]);
+				}
+				if(num[i][6] == num[i][j]) {
+					num[i][6] = rand() % 10 + 1;
+				}
+			}
+
+			if(i >= n) {
+				fprintf(fp, "--\n");
+			} else if(num[i][6] == 10) {
+				fprintf(fp, "%d\n", num[i][6]);
+			} else {
+				fprintf(fp, "0%d\n", num[i][6]);
+			}
+		}
+
+		fprintf(fp, "========* Op.");
+		fp_operator = fopen("operator_id_old.bin", "rb");
+		fread(operator_id, sizeof(int), 1, fp_operator);
+		fclose(fp_operator);
+		fprintf(fp, "%05d", operator_id[0]);
+		fprintf(fp, " *========\n");
+		fprintf(fp, "========= csie@CGU =========\n");
+		fclose(fp);
+		printf("已為您購買的 %d 組樂透彩組合輸出至 lotto.txt\n", n);
+
+		count[0]++;
+		fp_count = fopen("lotto_count.bin", "wb+");
+		fwrite(count, sizeof(int), 1, fp_count);
+		fclose(fp_count);
+        
+		lotto_record_t record[1];
+		record[0].lotto_no = count[0] - 1;
+		record[0].lotto_receipt = n * 50 * 1.1;
+		record[0].emp_id = operator_id[0];
+		//%b = month, %d = day, %Y = year, %X = time
+		strftime(record[0].lotto_date, 32, "%b %d %Y", info);
+		strftime(record[0].lotto_time, 32, "%X", info);
+		fp_record = fopen("records.bin", "ab");
+		fwrite(record, sizeof(lotto_record_t), 1, fp_record);
+		fclose(fp_record);	
+	} else {
+        
+		emp_record_t emp_new[1];
+		printf("請輸入要新增操作人員 ID (1-99) : ");
+		scanf("%d", &emp_new[0].emp_id);
+		printf("請輸入要新增操作人員 Name : ");
+		scanf("%s", &emp_new[0].emp_name);
+		printf("請輸入要新增操作人員 Salary : ");
+		scanf("%d", &emp_new[0].emp_salary);
+		fp_operator = fopen("operator_id.bin", "ab");
+		fwrite(emp_new, sizeof(emp_record_t), 1, fp_operator);
+		fclose(fp_operator);
+		printf("輸入完成\n");
+	}
+	
+	return 0;
 }

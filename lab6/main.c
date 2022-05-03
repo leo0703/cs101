@@ -1,18 +1,18 @@
 #include <stdio.h>
 
-int _sum(int x, int y) {
+int _a(int x, int y) {
     return x + y; 
 }
-int _sub(int x, int y) {
+int _b(int x, int y) {
     return x - y; 
 }
-int _mult(int x, int y) {
+int _c(int x, int y) {
     return x * y; 
 }
-int _div(int x, int y) {
+int _d(int x, int y) {
     return x / y; 
 }
-int _power(int x, int y) {
+int _e(int x, int y) {
     int sum = 1;
     for(int i = 0; i < y; i++) {
         sum *= x;
@@ -22,11 +22,11 @@ int _power(int x, int y) {
 int main(void) {
     int x, y, choice;
     int (*operation[5])(int, int);
-    operation[0] = _sum;
-    operation[1] = _sub;
-    operation[2] = _mult;
-    operation[3] = _div;
-    operation[4] = _power;
+    operation[0] = _a;
+    operation[1] = _b;
+    operation[2] = _c;
+    operation[3] = _d;
+    operation[4] = _e;
 
     printf("Enter two integer: ");
     scanf("%d%d", &x, &y);
